@@ -1,50 +1,45 @@
 //Created by yarden && shani on 09/06/2020.
 
-#ifndef ITERTOOLS_CFAR_RANGE_H
-#define ITERTOOLS_CFAR_RANGE_H
-
 
 namespace itertools {
     class range {
+
     public:
         class iterator {
-            class range;
+            friend class range;
 
-    public:
-            int operator*() const { return i; }
+        public:
+            int operator*() const { return i_; }
             const iterator &operator++() {
-                ++i;
+                ++i_;
                 return *this;
             }
-
-            bool operator==(const iterator &it) const {
-                return i == it.i;
-            }
-
             iterator operator++(int) {
                 iterator copy(*this);
-                ++i;
+                ++i_;
                 return copy;
             }
 
-            bool operator!=(const iterator &it) const {
-                return i != it.i;
+            bool operator==(const iterator &other) const {
+                return i_ == other.i_;
+            }
+            bool operator!=(const iterator &other) const {
+                return i_ != other.i_;
             }
 
-            iterator(int start) : i(start) {}
+        protected:
+            iterator(int start) : i_(start) {}
 
         private:
-            int i;
-
+            int i_;
         };
 
-        iterator end() const { return end; }
-        iterator begin() const { return begin; }
-        range(int begin, int end) : begin(begin), end(end) {}
+        iterator begin() const { return begin_; }
+        iterator end() const { return end_; }
+        range(int begin, int end) : begin_(begin), end_(end) {}
 
     private:
-        iterator begin;
-        iterator end;
+        iterator begin_;
+        iterator end_;
     };
 }
-
