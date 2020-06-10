@@ -1,45 +1,51 @@
-//Created by yarden && shani on 09/06/2020.
+//Created by yarden && shani on 09/06/2020
 
+#pragma once
 
-namespace itertools {
-    class range {
+namespace itertools{
+    class range{
+        int num1, num2;
 
     public:
-        class iterator {
-            friend class range;
+        range(int n1, int n2): num1(n1), num2(n2){}
 
+        class iterator{
+            int value;
         public:
-            int operator*() const { return i_; }
-            const iterator &operator++() {
-                ++i_;
+            iterator(int v): value(v) {};
+            iterator(const iterator& it) = default;
+
+            iterator& operator=(const iterator& it){
+                if(this != &it) this->value = it.value;
                 return *this;
             }
-            iterator operator++(int) {
-                iterator copy(*this);
-                ++i_;
-                return copy;
+
+            bool operator==(const iterator& it) {
+                return (value == it.value);
             }
 
-            bool operator==(const iterator &other) const {
-                return i_ == other.i_;
-            }
-            bool operator!=(const iterator &other) const {
-                return i_ != other.i_;
+            bool operator!=(const iterator& it) {
+                return (value != it.value);
             }
 
-        protected:
-            iterator(int start) : i_(start) {}
+            iterator& operator++(){
+                ++value;
+                return *this;
+            }
 
-        private:
-            int i_;
+            iterator operator++(int){
+                iterator iter = *this;
+                ++value;
+                return iter;
+            }
+
+            int operator*(){
+                return value;
+            }
         };
 
-        iterator begin() const { return begin_; }
-        iterator end() const { return end_; }
-        range(int begin, int end) : begin_(begin), end_(end) {}
-
-    private:
-        iterator begin_;
-        iterator end_;
+        iterator begin(){ return iterator(num1); }
+        iterator end(){ return iterator(num2); }
+        typedef int	value_type;
     };
 }

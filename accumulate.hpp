@@ -1,74 +1,75 @@
-//
-// Created by yarden && shani on 09/06/2020.
-//
+//Created by yarden && shani on 09/06/2020
 
-#ifndef ITERTOOLS_CFAR_ACCUMULATE_H
-#define ITERTOOLS_CFAR_ACCUMULATE_H
+#pragma once
 
-namespace itertools{
+namespace itertools {
 
-    template <typename T> class accumulate  {
-    private:
-       T container;
+    typedef struct {
+        template <typename T>
+        T operator ()(T x, T y) const{
+            return x+y;
+        }
+    } oper_plus;
 
-        struct Node {
-            T value;
-            Node* next;
-            Node(const T v, Node* n): value(v),next(n) { }
+    template <typename container, typename sign = oper_plus>
 
-        };
+    class accumulate {
+        container _container;
+        sign _sign;
+
     public:
-        accumulate(T c) :  container(c) {}
+        accumulate(container cont, sign s = oper_plus()) : _container(cont), _sign(s){}
 
-        class iterator {
-        private:
-            Node* pointerThis;
+        class iterator{
+            decltype(*(_container.begin())) _value;
+            typename container::iterator _iter;
+            typename container::iterator _end;
+            sign _sign;
 
         public:
-            iterator(Node* ptr= nullptr) : pointerThis(ptr){}
+            iterator(typename container::iterator iter, typename container::iterator end, sign s) : _iter(iter), _end(end), _sign(s), _value(*iter){};
+            iterator(const iterator& it) = default;
 
-            T& operator* () const {
-                return pointerThis->value;
-            }
-            T* operator->() const {
-                return &(pointerThis->value);
-            }
-            iterator& operator++() {
-                pointerThis= pointerThis->next;
+            iterator& operator=(const iterator& it){
+                if(this != &it) {
+                    this->_value = it._value;
+                    this->_iter = it._iter;
+                    this->_end = it._end;
+                    this->_sign = it._sign;
+                }
                 return *this;
             }
 
-            const iterator operator++(T){
-                iterator temp= *this;
-                pointerThis = pointerThis->next;
-                return temp;
+            bool operator==(const iterator& it) {
+                return _iter == it._iter;
             }
 
-            bool operator==(const iterator& r) const { // check id this is the same element
-                return *this == r.pointerThis;
-            }
-            bool operator!=(const iterator& r) const {
-                return *this != r.pointerThis;
+            bool operator !=(const iterator& it) {
+                return _iter != it._iter;
             }
 
-//            iterator begin() {
-//                return iterator{num1};
-//            }
+            //add more operators for the second eccumulate?
+            iterator& operator++(){
+                ++_iter;
+                if(_iter != _end) _value = _sign(_value, *_iter);
+                return *this;
+            }
 
-            iterator end(){
-                return iterator{nullptr};
+            iterator operator++(int){
+                iterator iter = *this;
+                ++(*this);
+                return iter;
+            }
+
+            auto operator*(){
+                return _value;
             }
         };
 
-        // לעשות for לaccumulate הרגיל וגם לא עשינו class ל-accumulate המשופר
-//        template<typename IT> accumulate(T c): accumulate() {
-////            for (Node* i= c-> ; i<end->value; begin++) {
-////                begin->value=value+1;
-//            }
-//        }
+        iterator begin(){ return iterator(_container.begin(), _container.end(), _sign); }
+        iterator end(){ return iterator(_container.end(), _container.end(), _sign); }
+
     };
 }
 
 
-
-#endif //ITERTOOLS_CFAR_ACCUMULATE_H

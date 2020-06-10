@@ -1,77 +1,70 @@
-//
-// Created by shani && yarden on 09/06/2020.
-//
-
-#ifndef ITERTOOLS_CFAR_FILTERFALSE_H
-#define ITERTOOLS_CFAR_FILTERFALSE_H
+//Created by yarden && shani on 09/06/2020
+#pragma once
+#include <iostream>
+#include <vector>
 
 namespace itertools{
 
-    template <typename bol, typename cnt> class filterfalse {
-    private:
-        cnt container;
-        bol b;
-        struct Node {
-            cnt value;
-            Node* next;
-            Node(const cnt v, Node* n): value(v),next(n) { }
+    template<typename sign, typename container>
 
-        };
+    class filterfalse {
+
+        sign _s;
+        container _container;
+        typedef typename container::value_type value_type;
+
     public:
-        filterfalse(cnt c) :  container(c) {}
+        filterfalse(sign s, container cont): _s(s), _container(cont){}
 
-        class iterator {
-        private:
-            Node* pointerThis;
+        class iterator{
+            typename container::iterator _begin;
+            typename container::iterator _end;
+            sign _s;
 
         public:
-            iterator(Node* ptr= nullptr) : pointerThis(ptr){}
+            iterator(typename container::iterator iter, typename container::iterator end, sign s) : _begin(iter), _end(end), _s(s){
+                while (_begin != _end && _s(*_begin))
+                    ++_begin;
+            }
 
-            cnt& operator* () const {
-                return pointerThis->value;
-            }
-            cnt* operator->() const {
-                return &(pointerThis->value);
-            }
-            iterator& operator++() {
-                pointerThis= pointerThis->next;
+            iterator& operator=(const iterator& it){
+                if(this != &it) {
+                    this->_begin = it._begin;
+                    this->_end = it._end;
+                    this->_s = it._s;
+                }
                 return *this;
             }
 
-            const iterator operator++(cnt){
-                iterator temp= *this;
-                pointerThis = pointerThis->next;
-                return temp;
+
+            bool operator==(const iterator& it) {
+                return _begin == it._begin;
             }
 
-            bool operator==(const iterator& r) const { // check id this is the same element
-                return *this == r.pointerThis;
-            }
-            bool operator!=(const iterator& r) const {
-                return *this != r.pointerThis;
+            bool operator!=(const iterator& it) {
+                return _begin != it._begin;
             }
 
-//            iterator begin() {
-//                return iterator{num1};
-//            }
-//
-//            iterator end(){
-//                return iterator{nullptr};
-//            }
+            iterator& operator++(){
+                do{
+                    ++_begin;
+                } while (_begin != _end && _s(*_begin));
+                return *this;
+            }
+
+            iterator operator++(int){
+                iterator iter = *this;
+                ++(*this);
+                return iter;
+            }
+
+            value_type operator*(){
+                return *_begin;
+            }
         };
 
-        // לעשות for לaccumulate הרגיל וגם לא עשינו class ל-accumulate המשופר
-//        template<typename IT> accumulate(T c): accumulate() {
-////            for (Node* i= c-> ; i<end->value; begin++) {
-////                begin->value=value+1;
-//            }
-//        }
+        iterator begin(){ return iterator(_container.begin(), _container.end(), _s); }
+        iterator end(){ return iterator(_container.end(), _container.end(), _s); }
     };
 }
 
-
-
-
-
-
-#endif //ITERTOOLS_CFAR_FILTERFALSE_H
